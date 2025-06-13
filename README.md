@@ -1,6 +1,7 @@
 # LaunchPad (macOS)
 
 A beautiful, full-screen Launchpad replacement for macOS, built with SwiftUI.
+Working on macOS 26
 
 ## Features
 
