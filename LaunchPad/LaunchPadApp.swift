@@ -19,7 +19,7 @@ struct LaunchPadApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     
     init() {
-        // 设置窗口样式，移除关闭、最小化和全屏按钮，并设置无边框窗口
+        // Set window style, remove close, minimize, and full-screen buttons, and set borderless window
         DispatchQueue.main.async {
             if let window = NSApplication.shared.windows.first {
                 window.styleMask = [.borderless, .fullSizeContentView]
@@ -28,11 +28,11 @@ struct LaunchPadApp: App {
                 window.isMovable = false
                 window.setFrame(NSScreen.main?.visibleFrame ?? .zero, display: true)
                 
-                // 设置半透明黑色背景
-                window.backgroundColor = .clear // 改为清透背景
+                // Set translucent black background
+                window.backgroundColor = .clear // Change to clear background
                 window.isOpaque = false
                 window.hasShadow = false
-                window.ignoresMouseEvents = false // 确保能接收鼠标事件
+                window.ignoresMouseEvents = false // Ensure mouse events can be received
             }
         }
     }
@@ -41,11 +41,11 @@ struct LaunchPadApp: App {
         WindowGroup {
             ContentView()
                 .onAppear {
-                    // 确保窗口覆盖屏幕但不遮盖 Dock
+                    // Ensure window covers screen but does not obscure Dock
                     DispatchQueue.main.async {
                         if let window = NSApplication.shared.windows.first {
                             window.styleMask = [.borderless, .fullSizeContentView]
-                            window.setFrame(NSScreen.main?.visibleFrame ?? .zero, display: true) // 使用 visibleFrame
+                            window.setFrame(NSScreen.main?.visibleFrame ?? .zero, display: true) // Use visibleFrame
                         }
                     }
                 }

@@ -11,7 +11,7 @@ struct SearchBarView: View {
                 .textFieldStyle(PlainTextFieldStyle())
         }
         .padding(8)
-        .frame(width: 200) // 固定搜索栏宽度
+        .frame(width: 200) // Fixed search bar width
         .background(Color(.controlBackgroundColor))
         .cornerRadius(8)
     }

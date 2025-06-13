@@ -14,7 +14,7 @@ struct AppGridView: View {
     @Binding var searchText: String
     @State private var draggingItem: AppModel? = nil
     @State private var currentPage: Int = 0
-    @State private var expandedFolder: AppModel? = nil // 当前展开的文件夹
+    @State private var expandedFolder: AppModel? = nil // Currently expanded folder
     @State private var isDragging = false
     @State private var dragPosition: CGPoint = .zero
     @State private var dragOverItem: AppModel? = nil
@@ -29,7 +29,7 @@ struct AppGridView: View {
         GridItem(.flexible(), spacing: 80),
         GridItem(.flexible(), spacing: 80)
     ]
-    private let itemsPerPage = 35 // 每页显示 35 个应用
+    private let itemsPerPage = 35 // 35 apps displayed per page
 
     var filteredApps: [AppModel] {
         if searchText.isEmpty {
@@ -47,8 +47,8 @@ struct AppGridView: View {
 
     var body: some View {
         VStack {
-            if let folder = expandedFolder {
-                // 显示展开的文件夹内容
+            if let folder = expandedFolder { // Display expanded folder content
+                // Display expanded folder content
                 ScrollView {
                     LazyVGrid(columns: columns, spacing: 20) {
                         ForEach(folder.children ?? []) { app in
@@ -76,18 +76,18 @@ struct AppGridView: View {
                                     if app.isFolder {
                                         FolderIconView(app: app, expandedFolder: $expandedFolder)
                                             .onDrop(of: [.text], delegate: DropViewDelegate(item: app, apps: $apps, draggingItem: $draggingItem, dragTimer: $dragTimer, isDragging: $isDragging))
-                                    } else {
+                                    } else { // If NSWorkspace fails, try using shell command
                                         AppIconView(app: app, draggingItem: $draggingItem, apps: $apps)
                                     }
                                 }
                             }
                             .padding()
                         }
-                        .tag(pageIndex) // 确保 tag 值与 pageIndex 匹配
+                        .tag(pageIndex) // Ensure tag value matches pageIndex
                     }
                 }
-                .onChange(of: dragOverItem) { oldValue, newValue in
-                    // 如果拖动超过一定时间，创建文件夹
+                .onChange(of: dragOverItem) { oldValue, newValue in // If dragging exceeds a certain time, create a folder
+                    // If dragging exceeds a certain time, create a folder
                     if let item = newValue {
                         dragTimer?.invalidate()
                         dragTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: false) { _ in
@@ -95,30 +95,30 @@ struct AppGridView: View {
                                 createFolderFromItems(item1: item, item2: draggingItem)
                             }
                         }
-                    } else {
+                    } else { // If NSWorkspace fails, try using shell command
                         dragTimer?.invalidate()
                         dragTimer = nil
                     }
                 }
                 .gesture(DragGesture(minimumDistance: 10).onEnded { value in
-                    if value.translation.width < 0 && currentPage < paginatedApps.count - 1 {
-                        currentPage += 1 // 向左拖动，切换到下一页
-                    } else if value.translation.width > 0 && currentPage > 0 {
-                        currentPage -= 1 // 向右拖动，切换到上一页
+                    if value.translation.width < 0 && currentPage < paginatedApps.count - 1 { // Drag left, switch to next page
+                        currentPage += 1 // Drag left, switch to next page
+                    } else if value.translation.width > 0 && currentPage > 0 { // Drag right, switch to previous page
+                        currentPage -= 1 // Drag right, switch to previous page
                     }
-                }, including: .all) // 确保手势优先级覆盖所有子视图
+                }, including: .all) // Ensure gesture priority covers all subviews
                 .onAppear {
-                    print("TabView appeared with currentPage: \(currentPage)") // 添加调试日志
+                    print("TabView appeared with currentPage: \(currentPage)") // Add debug log
                     NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
-                        if event.keyCode == 123 && currentPage > 0 { // 左箭头
+                        if event.keyCode == 123 && currentPage > 0 { // Left arrow
                             currentPage -= 1
-                        } else if event.keyCode == 124 && currentPage < paginatedApps.count - 1 { // 右箭头
+                        } else if event.keyCode == 124 && currentPage < paginatedApps.count - 1 { // Right arrow
                             currentPage += 1
                         }
                         return event
                     }
                 }
-                // 调整分页指示器位置
+                // Adjust pagination indicator position
                 HStack {
                     ForEach(0..<paginatedApps.count, id: \.self) { index in
                         Circle()
@@ -129,7 +129,7 @@ struct AppGridView: View {
                             }
                     }
                 }
-                .padding(.top, 20) // 向上移动分页指示器
+                .padding(.top, 20) // Move pagination indicator up
             } else {
                 Text("No apps found")
                     .foregroundColor(.gray)
@@ -144,16 +144,16 @@ struct AppGridView: View {
         }
         
         let folderName = "Folder"
-        let folder = createFolder(name: folderName, apps: [item1, item2])
+        let folder = createFolder(name: folderName, apps: [item1, item2]) // Add new folder
         
-        // 移除原始应用
-        apps.remove(at: max(index1, index2))
-        apps.remove(at: min(index1, index2))
+        // Remove original applications
+        apps.remove(at: max(index1, index2)) // Add new folder
+        apps.remove(at: min(index1, index2)) // Reset drag state
         
-        // 添加新文件夹
-        apps.insert(folder, at: min(index1, index2))
+        // Add new folder
+        apps.insert(folder, at: min(index1, index2)) // Reset drag state
         
-        // 重置拖拽状态
+        // Reset drag state
         draggingItem = nil
         dragOverItem = nil
         dragTimer?.invalidate()
@@ -173,17 +173,17 @@ struct AppIconView: View {
         Button(action: {
             print("Attempting to open app: \(app.name) with URL: \(app.url)")
             
-            // 使用 NSWorkspace 打开应用（优先使用）
+            // Use NSWorkspace to open the app (preferred)
             DispatchQueue.main.async {
-                // 先打开应用
+                // Open the app first
                 if NSWorkspace.shared.open(app.url) {
-                    // 成功打开后再隐藏启动器
+                    // Hide the launcher after successfully opening
                     DispatchQueue.main.async {
                         NSApplication.shared.hide(nil)
                     }
                     print("Successfully opened app via NSWorkspace: \(app.name)")
-                } else {
-                    // 如果 NSWorkspace 失败，尝试使用 shell 命令
+                } else { // If NSWorkspace fails, try using shell command
+                    // If NSWorkspace fails, try using shell command
                     let process = Process()
                     process.launchPath = "/usr/bin/open"
                     process.arguments = [app.url.path]
@@ -276,7 +276,7 @@ class DropViewDelegate: DropDelegate {
                 apps[index] = updatedFolder
             }
             
-            // 移除原始应用
+            // Remove original applications
             apps.removeAll { $0.id == draggingItem.id }
         } else if let fromIndex = apps.firstIndex(where: { $0.id == draggingItem.id }),
                   let toIndex = apps.firstIndex(where: { $0.id == item.id }) {

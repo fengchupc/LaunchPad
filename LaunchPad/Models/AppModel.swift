@@ -10,12 +10,12 @@ import UniformTypeIdentifiers
 struct AppModel: Identifiable, Equatable {
     let id = UUID()
     let name: String
-    let displayName: String // 添加本地化显示名称
+    let displayName: String // Add localized display name
     let icon: NSImage
     let url: URL
     let folderName: String?
-    var isFolder: Bool = false // 新增属性，标识是否为文件夹
-    var children: [AppModel]? = nil // 如果是文件夹，包含子应用程序
+    var isFolder: Bool = false // New property, indicates if it's a folder
+    var children: [AppModel]? = nil // If it's a folder, contains child applications
 
     static func == (lhs: AppModel, rhs: AppModel) -> Bool {
         lhs.id == rhs.id
@@ -64,10 +64,10 @@ func fetchApplications() -> [AppModel] {
         for appURL in appURLs {
             guard appURL.pathExtension == "app" else { continue }
             
-            // 获取应用程序包
+            // Get application bundle
             guard let bundle = Bundle(url: appURL) else { continue }
             
-            // 获取本地化显示名称
+            // Get localized display name
             let appName = bundle.localizedInfoDictionary?["CFBundleDisplayName"] as? String ??
                          bundle.localizedInfoDictionary?["CFBundleName"] as? String ??
                          bundle.infoDictionary?["CFBundleDisplayName"] as? String ??
